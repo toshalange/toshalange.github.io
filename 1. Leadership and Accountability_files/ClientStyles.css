@@ -1,0 +1,23 @@
+﻿.header-text-imc {
+    width: 85%;
+    font-size: 14pt;
+    text-align: center;
+    font-family: Calibri;
+    color: #A4343A;
+    padding: 6px 4px;
+    vertical-align: middle;
+}
+.companylogoTd-imc {
+    text-align: center;
+    padding: 4px 2px !important;
+    width: 13%;
+}
+.companylogoDiv-imc {
+    display: flex;
+}
+.mainDiv-imc {
+    font-family: Calibri;
+    display: inline-block;
+    width: 100%;
+    background: #E0E0E0;
+}
