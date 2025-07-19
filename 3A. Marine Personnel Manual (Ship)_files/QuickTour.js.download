@@ -1,0 +1,181 @@
+﻿
+var QDMS = QDMS || {};
+
+QDMS.QuickTour = {
+    _quickTourSteps : [],
+    _isAllContentLoaded: false,
+    _introJSOBJ: null,
+    _dynamicContent: '',
+    resetQuickTour: function () {
+        QDMS.QuickTour._quickTourSteps = [];
+        QDMS.QuickTour._isAllContentLoaded = false;
+        _introJSOBJ = null;
+    },
+
+    initializeQuickTour: function (pageName) {
+        this.resetQuickTour();
+
+        $.ajax({
+            url: $("#hfdUrlPath").val() + '/Home/GetQuickTour',
+            type: 'GET',
+            data: { "pageName": pageName },
+            success: function (result) {
+                QDMS.QuickTour._quickTourSteps = [];
+                $.each(result, function (index, qt) {                    
+                    QDMS.QuickTour._quickTourSteps.push({
+                        element: (qt.ElementSelector && $(qt.ElementSelector).length > 0) ? $(qt.ElementSelector)[0] : null,
+                        intro: qt.Introduction, exitOnEsc: true, hintPosition: 'top'
+                    });                    
+                });                
+            }
+        });
+    },
+    
+    startQuickTour: function () {
+        console.log("startQuickTour");
+        if (QDMS.QuickTour._quickTourSteps.length > 0) {
+            QDMS.QuickTour._isAllContentLoaded = false;
+            
+            var introObj = introJs();
+            introObj = introObj.setOptions(this._setOptions());
+            introObj.addHints();
+            introObj.onexit(function () {
+                QDMS.QuickTour._introJSOBJ.hideHints();
+                QDMS.QuickTour._introJSOBJ = null;
+                console.log("exit");
+            });
+            $(".introjs-hints a").each((i, e) => {
+                const dataStep = parseInt(e.getAttribute("data-step")) + 1;
+                $(e).find(".introjs-hint-pulse").html(dataStep.toString());
+                $(e).on("click", function (mc) {
+                    var hintNo = parseInt(mc.target.innerText);
+                    mc.preventDefault();
+                    var stepNo = QDMS.QuickTour.getStepCountFromHint(hintNo);
+                    QDMS.QuickTour._introJSOBJ.goToStep(stepNo);
+                });
+            });
+
+            introObj = introObj.start()
+                .onexit(() => {
+                    $(".introjs-hints").remove();
+                    QDMS.QuickTour._introJSOBJ = null;
+                    console.log("exit");
+                });
+            QDMS.QuickTour._introJSOBJ = introObj;
+            setTimeout(function () {
+                QDMS.QuickTour._setQuickTourShowAll();
+                
+            }, 100);
+                        
+        }
+    },
+
+    _setOptions: function () {
+        
+        var options = {
+            steps: QDMS.QuickTour._quickTourSteps,
+            hints: QDMS.QuickTour._quickTourSteps,
+            showBullets: false,
+            keyboardNavigation: true,
+            exitOnEsc: true,
+            showStepNumbers: false,
+            showProgress: false,
+            prevLabel: '<i class="fa fa-angle-left" id="prevIntro" aria-hidden="true"></i> Back',
+            nextLabel: 'Next <i class="fa fa-angle-right" id="nextIntro" aria-hidden="true"></i>',            
+            highlightClass: 'customHighlightClass',
+            exitOnOverlayClick: false,
+            scrollToElement: false
+        };
+
+        return options;
+    },
+
+    _setQuickTourShowAll: function () {
+        $(".introjs-tooltipbuttons").append('<div style="float:left"><a role="button" id="QTShowMore"  class="introjs-button introjs-showbutton"><i id="anglearrow" class="fa fa-angle-down" aria-hidden="true"></i> <span id="showButton">Show More</span></a> <a id="QTMute"><i class="btn-custom-icon sound-icon"></i></a></div><div class="intro-guide-all"><h5>All Guide</h5><div class="intro-list-blk" id="introContents"></div></div>');
+
+        if (QDMS.QuickTour._isAllContentLoaded == false) {
+            this._dynamicContent = this._getQuickTourDynamicContent();
+            
+            QDMS.QuickTour._isAllContentLoaded = true;
+        }
+
+        $('#QTShowMore').off("click");
+        $('#QTShowMore').on("click", function () {
+            let button = $('.introjs-tooltipbuttons #showButton').text();
+            if (button == "Show More") {
+                $('.intro-guide-all').addClass('open');
+                $(".introjs-tooltipbuttons #anglearrow").addClass("fa-angle-up");
+                $(".introjs-tooltipbuttons #anglearrow").removeClass("fa-angle-down");
+                $('.introjs-tooltipbuttons #showButton').html("Show Less");
+
+                $('#introContents').html(QDMS.QuickTour._dynamicContent);
+                window.dispatchEvent(new Event('resize'));
+
+                $('#introContents').slimScroll({
+                    height: '180px',
+                    size: '8px',
+                    color: '#333',
+                    distance: '1px',
+                    alwaysVisible: true
+                });
+                $('#introContents a').off("click");
+                $('#introContents a').on("click", function (e) {
+                    e.preventDefault();
+                    var stepNo = QDMS.QuickTour.getStepCountFromHint(parseInt(e.target.innerText));
+                    QDMS.QuickTour._introJSOBJ.goToStep(stepNo);
+                });
+                
+            }
+            else {
+                $('.intro-guide-all').removeClass('open');
+                $('.introjs-tooltipbuttons #showButton').html("Show More");
+                $(".introjs-tooltipbuttons #anglearrow").addClass("fa-angle-down");
+                $(".introjs-tooltipbuttons #anglearrow").removeClass("fa-angle-up");
+            }
+        });
+
+        
+
+    },
+    _getQuickTourDynamicContent: function () {
+        var dynamicContent = "";
+        var stepNo = 1;
+        $.each(QDMS.QuickTour._quickTourSteps, function (index, tourText) {
+            if (tourText.element != null) {
+                dynamicContent += '<div class="intro-list" id="introDetailed"><a role="button" tabindex= "0" id="dataHint" class="introjs-hint introjs-fixedhint"><div class="introjs-hint-dot" ></div><div class="introjs-hint-pulse" id="countIntro">' + stepNo + '</div></a><span>' + tourText.intro + '</span></div>';
+                stepNo++;
+            }
+        });
+        return dynamicContent;
+    },
+    getStepCountFromHint: function (hint) {
+        var stepCount = 0;
+        var hintCount = 0;
+
+        $.each(QDMS.QuickTour._quickTourSteps, function (index, tourText) {
+            if (tourText.element) {
+                hintCount++;
+            }
+            if (hintCount == hint) {
+                stepCount = index + 1;
+            } 
+        });
+
+        return stepCount;
+    },
+    exitQuickTour: function () {
+        if (QDMS.QuickTour._introJSOBJ) {
+            console.log("Exit called");
+            QDMS.QuickTour._isAllContentLoaded = false;
+            QDMS.QuickTour._introJSOBJ.exit(1);
+        }
+    },
+    startIfNotStarted: function () {
+        if (QDMS.QuickTour._introJSOBJ == null) {
+            console.log("startIfNotStarted");
+           QDMS.QuickTour.startQuickTour();
+        }
+    }
+};
+
+

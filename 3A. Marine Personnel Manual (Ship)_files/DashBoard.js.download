@@ -1,0 +1,1746 @@
+
+var StartDate_Tiles;
+var EndDate_Tiles;
+
+var StartDate_FCTile;
+var EndDate_FCTile;
+var flag;
+var docRefresh;
+var ArticleRefresh;
+var FilesRefresh;
+var FilesNewRefresh;
+var BpDashboardEnabled;
+$(document).ready(function () {
+    
+    BpDashboardEnabled = $("#BpDashboardEnabled").val(); 
+    var start_date = $("#hdnstartdate").val();
+    var end_Date = $("#hdnenddate").val();
+    var Load_Date = $("#hdnLoaddate").val();
+   
+    DocRefresh = true;
+    ArticleRefresh = true;
+    FilesRefresh = true;
+    AckTodoRefresh = true;
+    FilesNewRefresh = true;
+    
+
+//Flag & Category
+
+      var startFC_date = $("#hdstartDateFC").val();
+      var endFC_Date = $("#hdendDateFC").val();
+      var LoadFC_Date = $('#hdDateRangeFC').val();
+
+ //For getting date while click tab/tile(Article/Docs/Files)
+
+      StartDate_Tiles = start_date;
+      EndDate_Tiles = end_Date;
+
+ //For getting date while click tab/tile(circulars/flag)
+
+    StartDate_FCTile = startFC_date;
+    EndDate_FCTile = endFC_Date;
+   
+    flag = 1;//To identify document ready or datepicker filter in Circular and Flag 
+
+
+    // -----------------------------------------Onload date range picker value set-------------------------------
+   
+    if (BpDashboardEnabled =="True") {
+        $('input[name="datefilterfile3New"]').val($("#hdnLoaddate").val());    //File  formcheck=false
+        $('input[name="datefilterfile3"]').val($("#hdnLoaddate").val());    //File
+     
+    }
+    else {
+        $('input[name="datefilterDoc1"]').val($("#hdnLoaddate").val());     //Doc
+        $('input[name="datefilterArticle2"]').val($("#hdnLoaddate").val()); //Article
+        $('input[name="datefilterfile3"]').val($("#hdnLoaddate").val());    //File
+       
+    }
+
+  
+
+    $('input[name="datefilterCat4"]').val($("#hdDateRangeFC").val());   //Category-BSM
+    $('input[name="datefilterflag4"]').val($("#hdDateRangeFC").val());  //flagfiles
+    
+    
+
+    // --------------------------------------Onload date range picker value set --------------------------------
+
+
+    if ($("#hfdViewDocId").val() == "" && $("#hfdFileType").val() == "" && $("#IsFileDelete").val() != "true" && $("#hdndcrlViewdocid").val() == "") {
+
+        setTimeout(function () {
+            
+            if (BpDashboardEnabled =="True") {
+
+                GetDahboardFilestilescount(StartDate_Tiles, EndDate_Tiles);
+                _LoadFilesitems(start_date, end_Date);
+            }
+            else {
+                GetDahboardtilescount(StartDate_Tiles, EndDate_Tiles);
+                _LoadDocItems(start_date, end_Date);
+            }
+
+            if ($("#hdnAppEnv").val() == "O") {
+                GetDahboardAck_ToDotilescount();
+            }
+           
+        }, 300);
+       
+       
+        if ($("#hdnAppEnv").val() == "O") {
+           // _LoadAcknwToDolist(); // office Ack To-do
+        }
+        else {
+            _LoadAckDocListVessel(); // vessel Ack To-Do
+        }
+
+        setTimeout(function () {
+            
+            _LoadCircularslist(StartDate_FCTile, EndDate_FCTile); 
+           
+          //_LoadFlagLastDateRangeCount(StartDate_FCTile, EndDate_FCTile);
+           // _LoadFlagFileslistCount(StartDate_FCTile, EndDate_FCTile, flag);
+            
+        }, 300);
+
+
+        setTimeout(function () {
+            if (BpDashboardEnabled == "True") {
+                _LoadManageFileItems(); //Manage Files
+            }
+            else {
+                _LoadManageDocItems(); //Manage Documents
+                _LoadManageFileItems(); //Manage Files
+                _LoadManageArticleItems(); //Manage Articles
+
+            }
+           
+        }, 1500);
+
+    }
+
+    //---------------------------------------- DaterangePicker set date ------------------------------------------------
+
+    if (BpDashboardEnabled == "True") {
+        $('input[name="datefilterfile3New"]').daterangepicker({
+
+            // autoUpdateInput: false,
+            locale: {
+                cancelLabel: 'Clear',
+                format: 'DD-MMM-YYYY'
+            }
+
+        });     //** datefilter for files without Formcheck
+        $('input[name="datefilterfile3New"]').on('apply.daterangepicker', function (ev, picker) {
+            
+            //change all  datepickerrange value based on file datepicker value
+
+
+            $('input[name="datefilterfile3"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterfile3New"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+            
+
+            //change datepicker calendar start and end date
+
+
+            $('input[name="datefilterfile3"]').data('daterangepicker').setStartDate(picker.startDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterfile3"]').data('daterangepicker').setEndDate(picker.endDate.format('DD-MMM-YYYY'));
+          
+
+
+            var startDate = picker.startDate.format('DD-MMM-YYYY');
+            var endDate = picker.endDate.format('DD-MMM-YYYY');
+
+            StartDate_Tiles = startDate;
+            EndDate_Tiles = endDate;
+           
+            FilesRefresh = true;
+            FilesNewRefresh = true;
+
+            _LoadFilesitems(StartDate_Tiles, EndDate_Tiles);
+            GetDahboardFilestilescount(StartDate_Tiles, EndDate_Tiles);
+
+        });
+
+
+        $('input[name="datefilterfile3"]').daterangepicker({
+
+            // autoUpdateInput: false,
+            locale: {
+                cancelLabel: 'Clear',
+                format: 'DD-MMM-YYYY'
+            }
+
+        });     //** datefilter for Forms
+        $('input[name="datefilterfile3"]').on('apply.daterangepicker', function (ev, picker) {
+            
+            //change all  datepickerrange value based on file datepicker value
+
+
+            $('input[name="datefilterfile3"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterfile3New"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+           
+            //change datepicker calendar start and end date
+
+
+            $('input[name="datefilterfile3New"]').data('daterangepicker').setStartDate(picker.startDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterfile3New"]').data('daterangepicker').setEndDate(picker.endDate.format('DD-MMM-YYYY'));
+           
+
+
+            var startDate = picker.startDate.format('DD-MMM-YYYY');
+            var endDate = picker.endDate.format('DD-MMM-YYYY');
+
+            StartDate_Tiles = startDate;
+            EndDate_Tiles = endDate;
+           
+            FilesRefresh = true;
+            FilesNewRefresh = true;
+
+            _LoadFormstems(StartDate_Tiles, EndDate_Tiles);
+            GetDahboardFilestilescount(StartDate_Tiles, EndDate_Tiles);
+            
+
+        });
+
+    }
+    else {
+
+
+        $('input[name="datefilterDoc1"]').daterangepicker({
+
+            autoUpdateInput: true,
+
+            linkedCalendars: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: 'DD-MMM-YYYY'
+            }
+
+
+        });     //**datefilter for Doc
+        $('input[name="datefilterDoc1"]').on('apply.daterangepicker', function (ev, picker) {
+
+            //change all  datepickerrange value based on doc datepicker value
+
+
+            $('input[name="datefilterDoc1"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterArticle2"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterfile3"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+
+            //change datepicker calendar start and end date
+
+
+            $('input[name="datefilterArticle2"]').data('daterangepicker').setStartDate(picker.startDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterArticle2"]').data('daterangepicker').setEndDate(picker.endDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterfile3"]').data('daterangepicker').setStartDate(picker.startDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterfile3"]').data('daterangepicker').setEndDate(picker.endDate.format('DD-MMM-YYYY'));
+
+
+
+            var startDate = picker.startDate.format('DD-MMM-YYYY');
+            var endDate = picker.endDate.format('DD-MMM-YYYY');
+
+            StartDate_Tiles = startDate;
+            EndDate_Tiles = endDate;
+
+            DocRefresh = true;
+            ArticleRefresh = true;
+            FilesRefresh = true;
+
+            GetDahboardtilescount(StartDate_Tiles, EndDate_Tiles);
+            _LoadDocItems(StartDate_Tiles, EndDate_Tiles);
+
+
+
+
+        });
+
+        $('input[name="datefilterArticle2"]').daterangepicker({
+
+            //alwaysShowCalendars: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: 'DD-MMM-YYYY'
+            }
+
+        });  //**datefilter for Article
+        $('input[name="datefilterArticle2"]').on('apply.daterangepicker', function (ev, picker) {
+
+            //change all  datepickerrange value based on article datepicker value
+
+
+            $('input[name="datefilterArticle2"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterDoc1"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterfile3"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+
+            //change datepicker calendar start and end date
+
+
+            $('input[name="datefilterDoc1"]').data('daterangepicker').setStartDate(picker.startDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterDoc1"]').data('daterangepicker').setEndDate(picker.endDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterfile3"]').data('daterangepicker').setStartDate(picker.startDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterfile3"]').data('daterangepicker').setEndDate(picker.endDate.format('DD-MMM-YYYY'));
+
+
+
+            var startDate = picker.startDate.format('DD-MMM-YYYY');
+            var endDate = picker.endDate.format('DD-MMM-YYYY');
+
+            StartDate_Tiles = startDate;
+            EndDate_Tiles = endDate;
+
+            DocRefresh = true;
+            ArticleRefresh = true;
+            FilesRefresh = true;
+            _LoadArticleItems(StartDate_Tiles, EndDate_Tiles);
+            GetDahboardtilescount(StartDate_Tiles, EndDate_Tiles);
+
+        });
+
+        $('input[name="datefilterfile3"]').daterangepicker({
+
+            // autoUpdateInput: false,
+            locale: {
+                cancelLabel: 'Clear',
+                format: 'DD-MMM-YYYY'
+            }
+
+        });     //** datefilter for Forms
+        $('input[name="datefilterfile3"]').on('apply.daterangepicker', function (ev, picker) {
+
+            //change all  datepickerrange value based on file datepicker value
+
+
+            $('input[name="datefilterfile3"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterDoc1"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterArticle2"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+
+            //change datepicker calendar start and end date
+
+
+            $('input[name="datefilterDoc1"]').data('daterangepicker').setStartDate(picker.startDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterDoc1"]').data('daterangepicker').setEndDate(picker.endDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterArticle2"]').data('daterangepicker').setStartDate(picker.startDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterArticle2"]').data('daterangepicker').setEndDate(picker.endDate.format('DD-MMM-YYYY'));
+
+
+            var startDate = picker.startDate.format('DD-MMM-YYYY');
+            var endDate = picker.endDate.format('DD-MMM-YYYY');
+
+            StartDate_Tiles = startDate;
+            EndDate_Tiles = endDate;
+            DocRefresh = true;
+            ArticleRefresh = true;
+            FilesRefresh = true;
+
+            _LoadFormstems(StartDate_Tiles, EndDate_Tiles);
+            GetDahboardtilescount(StartDate_Tiles, EndDate_Tiles);
+
+        });
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    $('input[name="datefilterflag4"]').daterangepicker({
+
+        //autoUpdateInput: false,
+        locale: {
+            cancelLabel: 'Clear',
+            format: 'DD-MMM-YYYY'
+        }
+
+    });    //**datefilter for Flag 
+    $('input[name="datefilterflag4"]').on('apply.daterangepicker', function (ev, picker) {
+        
+        $('input[name="datefilterflag4"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+        $('input[name="datefilterCat4"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+        $('input[name="datefilterlegacydocs"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+
+
+        $('input[name="datefilterCat4"]').data('daterangepicker').setStartDate(picker.startDate.format('DD-MMM-YYYY'));
+        $('input[name="datefilterCat4"]').data('daterangepicker').setEndDate(picker.endDate.format('DD-MMM-YYYY'));
+        if ($("#legacydocskey").val() == "True") {
+            $('input[name="datefilterlegacydocs"]').data('daterangepicker').setStartDate(picker.startDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterlegacydocs"]').data('daterangepicker').setEndDate(picker.endDate.format('DD-MMM-YYYY'));
+        }
+        var startDate = picker.startDate.format('DD-MMM-YYYY');
+        var endDate = picker.endDate.format('DD-MMM-YYYY');
+        StartDate_FCTile = startDate;
+        EndDate_FCTile = endDate;
+        
+         flag = 0;
+       
+       // _LoadCircularslist_Count(StartDate_FCTile, EndDate_FCTile);
+        _LoadFlagFileslist(StartDate_FCTile, EndDate_FCTile,flag);
+        
+
+    });
+
+
+    $('input[name="datefilterCat4"]').daterangepicker({
+
+        //autoUpdateInput: false,
+        locale: {
+            cancelLabel: 'Clear',
+            format: 'DD-MMM-YYYY'
+        }
+
+    });    //**datefilter for circular 
+    $('input[name="datefilterCat4"]').on('apply.daterangepicker', function (ev, picker) {
+        $('input[name="datefilterCat4"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+        $('input[name="datefilterflag4"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+        $('input[name="datefilterlegacydocs"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+
+        $('input[name="datefilterflag4"]').data('daterangepicker').setStartDate(picker.startDate.format('DD-MMM-YYYY'));
+        $('input[name="datefilterflag4"]').data('daterangepicker').setEndDate(picker.endDate.format('DD-MMM-YYYY'));
+        if ($("#legacydocskey").val() == "True"){
+            $('input[name="datefilterlegacydocs"]').data('daterangepicker').setStartDate(picker.startDate.format('DD-MMM-YYYY'));
+            $('input[name="datefilterlegacydocs"]').data('daterangepicker').setEndDate(picker.endDate.format('DD-MMM-YYYY'));
+        }
+        var startDate = picker.startDate.format('DD-MMM-YYYY');
+        var endDate = picker.endDate.format('DD-MMM-YYYY');
+        StartDate_FCTile = startDate;
+        EndDate_FCTile = endDate;
+       
+        flag = 0;
+        
+        _LoadCircularslist(StartDate_FCTile, EndDate_FCTile);
+       // _LoadFlagFileslistCount(StartDate_FCTile, EndDate_FCTile,flag);
+
+
+    });
+
+    //$('input[name="datefilterlegacydocs"]').daterangepicker({
+
+    //    //autoUpdateInput: false,
+    //    locale: {
+    //        cancelLabel: 'Clear',
+    //        format: 'DD-MMM-YYYY'
+    //    }
+
+    //});    //**datefilter for Legacy Docs 
+    //$('input[name="datefilterlegacydocs"]').on('apply.daterangepicker', function (ev, picker) {
+    //    $('input[name="datefilterlegacydocs"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+    //    $('input[name="datefilterCat4"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+    //    $('input[name="datefilterflag4"]').val(picker.startDate.format('DD-MMM-YYYY') + ' - ' + picker.endDate.format('DD-MMM-YYYY'));
+
+
+    //    $('input[name="datefilterCat4"]').data('daterangepicker').setStartDate(picker.startDate.format('DD-MMM-YYYY'));
+    //    $('input[name="datefilterCat4"]').data('daterangepicker').setEndDate(picker.endDate.format('DD-MMM-YYYY'));
+    //    $('input[name="datefilterflag4"]').data('daterangepicker').setStartDate(picker.startDate.format('DD-MMM-YYYY'));
+    //    $('input[name="datefilterflag4"]').data('daterangepicker').setEndDate(picker.endDate.format('DD-MMM-YYYY'));
+    //    var startDate = picker.startDate.format('DD-MMM-YYYY');
+    //    var endDate = picker.endDate.format('DD-MMM-YYYY');
+
+
+    //    _LoadCircularslist(startDate, endDate);
+    //    _LoadFlagFileslist(startDate, endDate);
+    //   // _LoadLegacyDoclist(startDate, endDate);
+
+    //});
+
+
+    //-----------------------------------------Search in DashBoard----------------------------------------------------
+
+
+    $("#docDash-ManageDoc").keyup(function (event) {
+
+        _this = $("#docDash-ManageDoc").val();
+        if (event.which === 32 && event.target.selectionStart === 0) {
+            return false;
+        }
+        if (event.keyCode == 13) {
+            event.preventDefault();
+        }
+        $("#TilesManageDoc_dashboard").find(" .doc_dash_recordsBlock").each(function () {
+            _thisul = this;
+            var Text_val = $(this).find(".doc-name").text();
+            if (Text_val.toLowerCase().indexOf(_this.toLowerCase()) > -1)
+                $(_thisul).show();
+            else
+                $(_thisul).hide();
+        });
+        if ($("#TilesManageDoc_dashboard").find(" .doc_dash_recordsBlock:visible").length == 0) {
+            $("#no_ManageDocs_found").removeClass("hidden");
+        }
+        else {
+            $("#no_ManageDocs_found").addClass("hidden");
+        }
+
+
+    });
+    $("#docDash-ManageArti").keyup(function (event) {
+
+        _this = $("#docDash-ManageArti").val();
+        if (event.which === 32 && event.target.selectionStart === 0) {
+            return false;
+        }
+        if (event.keyCode == 13) {
+            event.preventDefault();
+        }
+        $("#ManagevslmArticleItsm").find(" .doc_dash_recordsBlock").each(function () {
+            _thisul = this;
+            var Text_val = $(this).find(".doc-name").text();
+            if (Text_val.toLowerCase().indexOf(_this.toLowerCase()) > -1)
+                $(_thisul).show();
+            else
+                $(_thisul).hide();
+        });
+        if ($("#ManagevslmArticleItsm").find(" .doc_dash_recordsBlock:visible").length == 0) {
+            $("#no_MangeArti_found").removeClass("hidden");
+        }
+        else {
+            $("#no_MangeArti_found").addClass("hidden");
+        }
+
+
+    });
+    $("#docDash-ManageFiles").keyup(function (event) {
+
+        _this = $("#docDash-ManageFiles").val();
+        if (event.which === 32 && event.target.selectionStart === 0) {
+            return false;
+        }
+        if (event.keyCode == 13) {
+            event.preventDefault();
+        }
+        $("#ManagevslmFileItsm").find(" .doc_dash_recordsBlock").each(function () {
+            _thisul = this;
+            var Text_val = $(this).find(".doc-name").text();
+            if (Text_val.toLowerCase().indexOf(_this.toLowerCase()) > -1)
+                $(_thisul).show();
+            else
+                $(_thisul).hide();
+        });
+        if ($("#ManagevslmFileItsm").find(" .doc_dash_recordsBlock:visible").length == 0) {
+            $("#no_forms_found").removeClass("hidden");
+
+        }
+        else {
+            $("#no_forms_found").addClass("hidden");
+        }
+
+
+    });
+
+
+    $("#documentsearchFilestile").keyup(function (event) {
+        
+        
+        _this = $("#documentsearchFilestile").val();
+        if (event.which === 32 && event.target.selectionStart === 0) {
+            return false;
+        }
+        if (event.keyCode == 13) {
+            event.preventDefault();
+        }
+       
+        $("#TabRecentForm").find(".doc_dash_recordsBlock").each(function () {
+           
+            _thisul = this;
+            var Text_val = $(this).find(".doc-name").text();
+            if (Text_val.toLowerCase().indexOf(_this.toLowerCase()) > -1)
+                $(_thisul).show();
+            else
+                $(_thisul).hide();
+        });
+        if ($("#TabRecentForm").find(" .doc_dash_recordsBlock:visible").length == 0) {
+            $("#no_RecentForms_found").removeClass("hidden");
+        }
+        else {
+            $("#no_RecentForms_found").addClass("hidden");
+        }
+
+
+    });
+
+
+    $("#documentsearchFile1").keyup(function (event) {
+      
+        _this = $("#documentsearchFile1").val();
+        if (event.which === 32 && event.target.selectionStart === 0) {
+            return false;
+        }
+        if (event.keyCode == 13) {
+            event.preventDefault();
+        }
+       
+        $("#TabRecentFile").find(".doc_dash_recordsBlock").each(function () {
+           
+            _thisul = this;
+            var Text_val = $(this).find(".doc-name").text();
+            if (Text_val.toLowerCase().indexOf(_this.toLowerCase()) > -1)
+                $(_thisul).show();
+            else
+                $(_thisul).hide();
+        });
+        if ($("#TabRecentFile").find(" .doc_dash_recordsBlock:visible").length == 0) {
+            $("#no_RecentFiles_found").removeClass("hidden");
+        }
+        else {
+            $("#no_RecentFiles_found").addClass("hidden");
+        }
+
+
+    });
+
+    
+
+
+    $("#documentsearchArticletile").keyup(function (event) {
+
+        _this = $("#documentsearchArticletile").val();
+        if (event.which === 32 && event.target.selectionStart === 0) {
+            return false;
+        }
+        if (event.keyCode == 13) {
+            event.preventDefault();
+        }
+        $("#TabRecentArticle").find(".doc_dash_recordsBlock").each(function () {
+            $("#no_RecentArti_found").addClass("hidden");
+            _thisul = this;
+            var Text_val = $(this).find(".doc-name").text();
+            if (Text_val.toLowerCase().indexOf(_this.toLowerCase()) > -1)
+                $(_thisul).show();
+            else
+                $(_thisul).hide();
+        });
+        if ($("#TabRecentArticle").find(" .doc_dash_recordsBlock:visible").length == 0) {
+            $("#no_RecentArti_found").removeClass("hidden");
+        }
+        else {
+            $("#no_RecentArti_found").addClass("hidden");
+        }
+
+
+    });
+    $("#documentsearchDoctile").keyup(function (event) {
+
+
+        _this = $("#documentsearchDoctile").val();
+        if (event.which === 32 && event.target.selectionStart === 0) {
+            return false;
+        }
+        if (event.keyCode == 13) {
+            event.preventDefault();
+        }
+        $("#TabRecentDoc").find(".doc_dash_recordsBlock").each(function () {
+            _thisul = this;
+            var Text_val = $(this).find(".doc-name").text();
+            if (Text_val.toLowerCase().indexOf(_this.toLowerCase()) > -1)
+                $(_thisul).show();
+            else
+                $(_thisul).hide();
+        });
+        if ($("#TabRecentDoc").find(" .doc_dash_recordsBlock:visible").length == 0) {
+            $("#no_RecentDocs_found").removeClass("hidden");
+        }
+        else {
+            $("#no_RecentDocs_found").addClass("hidden");
+        }
+
+
+    });
+    $("#AckToDoSearchtile").keyup(function (event) {
+
+
+        _this = $("#AckToDoSearchtile").val();
+        if (event.which === 32 && event.target.selectionStart === 0) {
+            return false;
+        }
+        if (event.keyCode == 13) {
+            event.preventDefault();
+        }
+        $("#TabAckToDoList").find(".doc_dash_recordsBlock").each(function () {
+            _thisul = this;
+            var Text_val = $(this).find(".doc-name").text();
+            if (Text_val.toLowerCase().indexOf(_this.toLowerCase()) > -1)
+                $(_thisul).show();
+            else
+                $(_thisul).hide();
+        });
+        if ($("#TabAckToDoList").find(" .doc_dash_recordsBlock:visible").length == 0) {
+            $("#no_AcktodoDocs_found").removeClass("hidden");
+        }
+        else {
+            $("#no_AcktodoDocs_found").addClass("hidden");
+        }
+
+
+    });
+
+
+
+
+});
+
+
+
+
+
+
+
+function sortByDateAscRight() {
+    $("#srt_DaDC").removeClass("sort_option_color");
+    $("#srt_NDD").removeClass("sort_option_color");
+    $("#srt_NAA").removeClass("sort_option_color");
+    $("#srt_DaC").addClass("sort_option_color");
+
+    $(".bsmcategorysort .doc_dash_recordsBlock").sort(sortAscending).appendTo('.bsmcategorysort');
+    $(".flagsort .doc_dash_recordsBlock").sort(sortAscending).appendTo('.flagsort');
+    $(".legacyDocSort .doc_dash_recordsBlock").sort(sortAscending).appendTo('.legacyDocSort');
+}
+function sortByDateDesRight() {
+
+    $("#srt_DaDC").addClass("sort_option_color");
+    $("#srt_NDD").removeClass("sort_option_color");
+    $("#srt_NAA").removeClass("sort_option_color");
+    $("#srt_DaC").removeClass("sort_option_color");
+
+
+    $(".bsmcategorysort .doc_dash_recordsBlock").sort(sortDescending).appendTo('.bsmcategorysort');
+    $(".flagsort .doc_dash_recordsBlock").sort(sortDescending).appendTo('.flagsort');
+    $(".legacyDocSort .doc_dash_recordsBlock").sort(sortDescending).appendTo('.legacyDocSort');
+}
+//function sortByDateAsc() {
+//   
+//    $("#srt_list_vall li").removeClass("sort_option_color");
+//    $("#srt_DaA").addClass("sort_option_color");
+//    $(".docclass li").sort(sortAscending).appendTo('.docclass');
+//    $(".ularticle li").sort(sortAscending).appendTo('.ularticle');
+//    $(".fileulsort li").sort(sortAscending).appendTo('.fileulsort');
+//    $(".acktodovesselsort li").sort(sortAscending).appendTo('.acktodovesselsort');
+//    $(".acktodoofficesort li").sort(sortAscending).appendTo('.acktodoofficesort');
+
+//}
+//function sortByDateDes() {
+
+//    
+
+//    $("#srt_list_vall li").removeClass("sort_option_color");
+//    $("#srt_DaD").addClass("sort_option_color");
+//   $(".docclass li").sort(sortDescending).appendTo('.docclass');
+//    $(".ularticle li").sort(sortDescending).appendTo('.ularticle');
+//    $(".fileulsort li").sort(sortDescending).appendTo('.fileulsort');
+//    $(".acktodovesselsort li").sort(sortDescending).appendTo('.acktodovesselsort');
+//    $(".acktodoofficesort li").sort(sortDescending).appendTo('.acktodoofficesort');
+
+//}
+//function sortByNameAscdoc() {
+
+//    $("#srt_list_vall li").removeClass("sort_option_color");
+//    $("#srt_NAd").addClass("sort_option_color");
+//     $(".docclass li").sort(asc_sort).appendTo('.docclass');
+//    $(".ularticle li").sort(asc_sort).appendTo('.ularticle');
+//    $(".fileulsort li").sort(asc_sort).appendTo('.fileulsort');
+//    $(".acktodovesselsort li").sort(asc_sort).appendTo('.acktodovesselsort');
+//    $(".acktodoofficesort li").sort(asc_sort).appendTo('.acktodoofficesort');
+//}
+//function sortByNameDesdoc() {
+
+//    $("#srt_list_vall li").removeClass("sort_option_color");
+//    $("#srt_NDd").addClass("sort_option_color");
+//     $(".docclass li").sort(dec_sort).appendTo('.docclass');
+//    $(".ularticle li").sort(dec_sort).appendTo('.ularticle');
+//    $(".fileulsort li").sort(dec_sort).appendTo('.fileulsort');
+//    $(".acktodovesselsort li").sort(dec_sort).appendTo('.acktodovesselsort');
+//    $(".acktodoofficesort li").sort(dec_sort).appendTo('.acktodoofficesort');
+//}
+function sortByNameAsc() {
+
+    $("#srt_DaDC").removeClass("sort_option_color");
+    $("#srt_NDD").removeClass("sort_option_color");
+    $("#srt_NAA").addClass("sort_option_color");
+    $("#srt_DaC").removeClass("sort_option_color");
+
+
+
+    $(".bsmcategorysort li").sort(asc_sort).appendTo('.bsmcategorysort');
+    $(".flagsort li").sort(asc_sort).appendTo('.flagsort');
+    $(".legacyDocSort .doc_dash_recordsBlock").sort(asc_sort).appendTo('.legacyDocSort');
+    //legacyDocSort
+
+}
+
+
+function sortByNameDes() {
+
+    $("#srt_DaDC").removeClass("sort_option_color");
+    $("#srt_NDD").addClass("sort_option_color");
+    $("#srt_NAA").removeClass("sort_option_color");
+    $("#srt_DaC").removeClass("sort_option_color");
+
+
+    $(".bsmcategorysort li").sort(dec_sort).appendTo('.bsmcategorysort');
+    $(".flagsort li").sort(dec_sort).appendTo('.flagsort');
+    $(".legacyDocSort .doc_dash_recordsBlock").sort(dec_sort).appendTo('.legacyDocSort');
+}
+
+function asc_sort(a, b) {
+    return ($(b).text().trim().toLowerCase()) < ($(a).text().trim().toLowerCase()) ? 1 : -1;
+}
+function dec_sort(a, b) {
+    return ($(b).text().trim().toLowerCase()) > ($(a).text().trim().toLowerCase()) ? 1 : -1;
+} // decending sort
+
+function sortByDateAsc() {
+    
+    $("#srt_NAd").removeClass("sort_option_color");
+    $("#srt_NDd").removeClass("sort_option_color");
+    $("#srt_DaA").addClass("sort_option_color");
+    $("#srt_DaD").removeClass("sort_option_color");
+
+    if (BpDashboardEnabled == "True") {
+        $(".fileulsort .doc_dash_recordsBlock").sort(sortAscending).appendTo('.fileulsort');
+        $(".fileNewulsort .doc_dash_recordsBlock").sort(sortAscending).appendTo('.fileNewulsort');
+    }
+    else {
+
+
+        // $(".docclass li").sort(dec_sort).appendTo('.fixedtabheight');
+        $(".docclass .doc_dash_recordsBlock").sort(sortAscending).appendTo('.docclass');
+
+        //$(".docclass li").sort(sortAscending).appendTo('.docclass');
+        $(".ularticle .doc_dash_recordsBlock").sort(sortAscending).appendTo('.ularticle');
+        $(".fileulsort .doc_dash_recordsBlock").sort(sortAscending).appendTo('.fileulsort');
+    }
+    $(".acktodovesselsort .doc_dash_recordsBlock").sort(sortAscending).appendTo('.acktodovesselsort');
+    $(".acktodoofficesort .doc_dash_recordsBlock").sort(sortAscending).appendTo('.acktodoofficesort');
+
+}
+function sortByDateDes() {
+
+
+
+    $("#srt_NAd").addClass("sort_option_color");
+    $("#srt_NDd").removeClass("sort_option_color");
+    $("#srt_DaA").removeClass("sort_option_color");
+    $("#srt_DaD").removeClass("sort_option_color");
+    if (BpDashboardEnabled == "True") {
+        $(".fileulsort .doc_dash_recordsBlock").sort(sortDescending).appendTo('.fileulsort');
+        $(".fileNewulsort .doc_dash_recordsBlock").sort(sortDescending).appendTo('.fileNewulsort');
+    }
+    else {
+        // $(".docclass li").sort(dec_sort).appendTo('.fixedtabheight');
+        $(".docclass .doc_dash_recordsBlock").sort(sortDescending).appendTo('.docclass');
+        //$(".docclass li").sort(sortDescending).appendTo('.fixedtabheight');
+        $(".ularticle .doc_dash_recordsBlock").sort(sortDescending).appendTo('.ularticle');
+        $(".fileulsort .doc_dash_recordsBlock").sort(sortDescending).appendTo('.fileulsort');
+
+    }
+
+   
+    $(".acktodovesselsort .doc_dash_recordsBlock").sort(sortDescending).appendTo('.acktodovesselsort');
+    $(".acktodoofficesort .doc_dash_recordsBlock").sort(sortDescending).appendTo('.acktodoofficesort');
+
+}
+function sortByNameAscdoc() {
+    
+
+
+
+    $("#srt_NAd").addClass("sort_option_color");
+    $("#srt_NDd").removeClass("sort_option_color");
+    $("#srt_DaA").removeClass("sort_option_color");
+    $("#srt_DaD").removeClass("sort_option_color");
+
+    if (BpDashboardEnabled == "True") {
+        $(".fileulsort .doc_dash_recordsBlock").sort(asc_sort).appendTo('.fileulsort');
+        $(".fileNewulsort .doc_dash_recordsBlock").sort(asc_sort).appendTo('.fileNewulsort');
+        
+    }
+    else {
+        $(".docclass .doc_dash_recordsBlock").sort(asc_sort).appendTo('.docclass');
+
+        $(".ularticle .doc_dash_recordsBlock").sort(asc_sort).appendTo('.ularticle');
+        $(".fileulsort .doc_dash_recordsBlock").sort(asc_sort).appendTo('.fileulsort');
+    }
+    $(".acktodovesselsort .doc_dash_recordsBlock").sort(asc_sort).appendTo('.acktodovesselsort');
+    $(".acktodoofficesort .doc_dash_recordsBlock").sort(asc_sort).appendTo('.acktodoofficesort');
+}
+function sortByNameDesdoc() {
+
+
+    $("#srt_NAd").removeClass("sort_option_color");
+    $("#srt_NDd").addClass("sort_option_color");
+    $("#srt_DaA").removeClass("sort_option_color");
+    $("#srt_DaD").removeClass("sort_option_color");
+    if (BpDashboardEnabled =="True") {
+        $(".fileulsort .doc_dash_recordsBlock").sort(dec_sort).appendTo('.fileulsort');
+        $(".fileNewulsort .doc_dash_recordsBlock").sort(dec_sort).appendTo('.fileNewulsort');
+    }
+    else {
+
+        // $(".docclass li").sort(dec_sort).appendTo('.fixedtabheight');
+        $(".docclass .doc_dash_recordsBlock").sort(dec_sort).appendTo('.docclass');
+
+        $(".ularticle .doc_dash_recordsBlock").sort(dec_sort).appendTo('.ularticle');
+        $(".fileulsort .doc_dash_recordsBlock").sort(dec_sort).appendTo('.fileulsort');
+    }
+    $(".acktodovesselsort .doc_dash_recordsBlock").sort(dec_sort).appendTo('.acktodovesselsort');
+    $(".acktodoofficesort .doc_dash_recordsBlock").sort(dec_sort).appendTo('.acktodoofficesort');
+}
+
+
+
+function sortDescending(a, b) {
+
+    
+    var c = $(a).text();
+
+    var date1 = $(a).find(".dt-fltr").text();
+    date1 = date1.split('/');
+    var k = date1[2].split(" ");
+    date1 = new Date(k[0], date1[1] - 1, date1[0]);
+    var date2 = $(b).find(".dt-fltr").text();
+    date2 = date2.split('/');
+    l = date2[2].split(" ");
+    date2 = new Date(l[0], date2[1] - 1, date2[0]);
+    return date1 < date2 ? 1 : -1;
+};
+function sortAscending(a, b) {
+    
+   
+    var date1 = $(a).find(".dt-fltr").text();
+    date1 = date1.split('/');
+    var k = date1[2].split(" ");
+    date1 = new Date(k[0], date1[1] - 1, date1[0]);
+    var date2 = $(b).find(".dt-fltr").text();
+    date2 = date2.split('/');
+    l = date2[2].split(" ");
+    date2 = new Date(l[0], date2[1] - 1, date2[0]);
+    return date1 > date2 ? 1 : -1;
+};
+
+
+//function sortDescending(a, b) {
+//    
+
+
+//    var doctext = $("#TabRecentDochiden").html();
+//    $("#TabRecentDoc").html(doctext);
+//    var date1 = $(a).find(".dt-fltr").text();
+//    date1 = date1.split('/');
+//    date1 = new Date(date1[2], date1[1], date1[0]);
+//    var date2 = $(b).find(".dt-fltr").text();
+//    date2 = date2.split('/');
+//    date2 = new Date(date2[2], date2[1] , date2[0]);
+
+//    return date1 < date2 ? 1 : -1;
+//};
+//function sortAscending(a, b) {
+//    
+//    $(".docclass li").sort(dec_sort).appendTo('.docclass li');
+//    $(".ularticle li").sort(dec_sort).appendTo('.ularticle li');
+//    $(".fileulsort li").sort(dec_sort).appendTo('.fileulsort li');
+//    $(".acktodovesselsort li").sort(dec_sort).appendTo('.acktodovesselsort li');
+//    $(".acktodoofficesort li").sort(dec_sort).appendTo('.acktodoofficesort li');
+//    var date1 = $(a).find(".dt-fltr").text();
+//    date1 = date1.split('/');
+//    date1 = new Date(date1[2], date1[1] , date1[0]);
+//    var date2 = $(b).find(".dt-fltr").text();
+//    date2 = date2.split('/');
+//    date2 = new Date(date2[2], date2[1] , date2[0]);
+
+//    return date1 > date2 ? 1 : -1;
+//};
+
+
+
+//function sortDescending(a, b) {
+//    
+//    var date1 = $(a).find(".dt-fltr").text();
+//    date1 = date1.split(/ (.*)/);
+//    var d1 = date1[0].split('/');
+
+//    var t1 = date1[1].split(' ');
+
+//    var t11 = t1[0].split(":");
+
+//    if (t1[1] === 'PM' && t11[0] < 12)
+//        t11[0] = parseInt(t11[0]) + 12;
+//        t1[1] = t11[0] + ":" + t11[1] + ":00";
+
+
+//    date1 = new Date(d1[2], d1[1], d1[0],t11[0],t11[1]);
+
+//    var date2 = $(b).find(".dt-fltr").text();
+//    date2 = date2.split(/ (.*)/);
+//    var d11 = date2[0].split('/');
+
+
+//    var t10 = date2[1].split(' ');
+
+//    var t111 = t10[0].split(":");
+
+//    if (t10[1] === 'PM' && t111[0] < 12)
+//        t111[0] = parseInt(t111[0]) + 12;
+//    t10[1] = t111[0] + ":" + t111[1] + ":00";
+
+//    date2 = new Date(d11[2], d11[1], d11[0],t111[0],t111[1]);
+
+//    return date1 < date2 ? 1 : -1;
+//};
+//function sortAscending(a, b) {
+//    
+//    var date1 = $(a).find(".dt-fltr").text();
+//    date1 = date1.split(/ (.*)/);
+//    var d1 = date1[0].split('/');
+
+//    var t1 = date1[1].split(' ');
+
+//    var t11 = t1[0].split(":");
+
+//    if (t1[1] === 'PM' && t11[0] < 12)
+//        t11[0] = parseInt(t11[0]) + 12;
+//    t1[1] = t11[0] + ":" + t11[1] + ":00";
+
+
+//    date1 = new Date(d1[2], d1[1], d1[0], t11[0], t11[1]);
+
+//    var date2 = $(b).find(".dt-fltr").text();
+//    date2 = date2.split(/ (.*)/);
+//    var d11 = date2[0].split('/');
+
+//    var t10 = date2[1].split(' ');
+
+//    var t111 = t10[0].split(":");
+
+//    if (t10[1] === 'PM' && t111[0] < 12)
+//        t111[0] = parseInt(t111[0]) + 12;
+//    t10[1] = t111[0] + ":" + t111[1] + ":00";
+
+//    date2 = new Date(d11[2], d11[1], d11[0], t111[0], t111[1]);
+
+
+
+//    return date1 > date2 ? 1 : -1;
+//    //var date1 = $(a).find(".dt-fltr").text();
+
+
+
+//    //var date2 = $(b).find(".dt-fltr").text();
+
+
+//    //return date1 > date2 ? 1 : -1;
+//};
+//---------------------------------------------Dashboard Recent items tile load -----------
+
+
+//---------------------------------------------Dashboard Recent items tile load -----------
+
+//AcknowledgmentTODO-Vessel
+function _LoadAckDocListVessel() {
+    
+    var Singleuser = $("#hdnAckUserselect").val();
+    if (Singleuser == "N") {
+        $.ajax({
+            type: 'GET',
+            url: $("#hfdUrlPath").val() + '/Vessel/GetEmployeeBasedonRank',
+            processData: true,
+            success: function (result) {
+
+                if (result != null && result.length > 0) {
+                    if (result.length == 1) // have one user we provide confirmation message
+                    {
+                        $("#hdnAckUserselect").val("Y")
+                        GetAckToDoVessel(result[0].Per_ID);
+                    }
+                    else {
+
+                        $("#sltUsrBtn").show();
+                    }
+
+                }
+                else {
+                    $("#UserDtlsItemsList").html("<span>No users found !!!</span>");
+                }
+            }
+        });
+    } else {
+        GetAckToDoVessel("");
+    }
+}
+
+//AcknowledgmentTODO-Office
+function _LoadAcknwToDolist() {
+
+    
+    if (AckTodoRefresh == true) {
+
+        $("#AckToDoSearchtile").val('');
+        $("#AckToDoCount").text("--");
+        $("#TabAckToDoList").html(DashLoderHtmlTiny);
+        var _url ='/Document/GetDashboad_Acknowledgmentlist_office';
+        if ($("#hdnFileAcknowledgment").val() === "True")
+         _url = '/File/GetDashboad_FileAcknowledgmentlist_office';
+        $.ajax({
+            url: $("#hfdUrlPath").val() + _url,
+            //  data: { "startDate": startDate, "endDate": endDate },
+            type: 'GET',
+            crossDomain: true,
+            success: function (result) {
+                $("#TabAckToDoList").html(result);
+                ConvertUTCDateToLocalDate("spnACKToDoUTCDate");
+                $("#AckToDoCount").text($("#hdnAckTodo_count").val());
+            }
+        });
+        AckTodoRefresh = false;
+    }
+}
+
+
+
+//Doc/Article,Files,ack to-do  Tab click
+
+
+      function _LoadAck_ToTabclick() {
+          if ($("#hdnAppEnv").val() == "O") {
+              _LoadAcknwToDolist(); // office Ack To-do
+          }
+          else {
+              _LoadAckDocListVessel(); // vessel Ack To-Do
+          }
+          $('#AckToDoSearchtile').val('');
+          $("#AckToDoSearchtile").trigger($.Event("keydown", { keyCode: 8 }));
+      }
+
+       function _LoadDocItemsTabclick() {
+        
+          
+          _LoadDocItems(StartDate_Tiles, EndDate_Tiles);
+         
+       }
+      function _LoadArticleItemsTabclick() {
+          
+          _LoadArticleItems(StartDate_Tiles, EndDate_Tiles);
+         
+      }
+      function _LoadFormstemsTabclick() {
+          
+          _LoadFormstems(StartDate_Tiles, EndDate_Tiles);
+          $('#documentsearchFilestile').val('');
+          $("#documentsearchFilestile").trigger($.Event("keydown", { keyCode: 8 }));
+          
+      }
+        function _LoadFilesitemsTabclick()
+        {
+            _LoadFilesitems(StartDate_Tiles, EndDate_Tiles);
+            $('#documentsearchFile1').val('');
+            $("#documentsearchFilestile").trigger($.Event("keydown", { keyCode: 8 }));
+        }
+//Flag management/Circular Tab click
+
+function BsmCircular_clk() {
+    
+    $('#flg_date_range_dash').hide();
+    $('#bsmcicular_date_range_dash').show();
+    
+   
+     _LoadCircularslist(StartDate_FCTile, EndDate_FCTile);
+   
+   // _LoadFlagFileslistCount(StartDate_FCTile, EndDate_FCTile, flag);
+    
+}
+
+function FlagState_clk() {
+    
+    $('#bsmcicular_date_range_dash').hide();
+    $('#flg_date_range_dash').show();
+    _LoadFlagFileslist(StartDate_FCTile, EndDate_FCTile, flag);
+   //_LoadCircularslist_Count(StartDate_FCTile, EndDate_FCTile, flag);
+ 
+
+}
+
+
+//Recent Document//
+function _LoadDocItems(startDate, endDate) {
+    
+    if (DocRefresh == true) {
+
+
+        $("#documentsearchDoctile").val('');
+
+        $("#RecentDocCount").text("--");
+        $("#TabRecentDoc").html(DashLoderHtmlTiny);
+        $.ajax({
+            url: $("#hfdUrlPath").val() + '/Document/GetVesselMenuDocumentInfo',
+            data: { "startDate": startDate, "endDate": endDate },
+            type: 'GET',
+            crossDomain: true,
+            success: function (result) {
+                
+                $("#TabRecentDoc").html(DashLoderHtmlTiny);
+                $("#TabRecentDoc").html(result);
+                ConvertUTCDateToLocalDate("spnDashBrdDocUTCDate");
+                //  $("#TabRecentDochiden").html(result);
+
+                $("#RecentDocCount").text($("#hdnRec_DocCount_Dash").val());
+            }
+        });
+        DocRefresh = false;
+    }
+}
+
+//All tile count Get article/files/ackTo-do count
+
+
+function GetDahboardtilescount(startDate, endDate) {
+    
+   
+    $("#RecentDocCount").text("--");
+    $("#RecentArtiCount").text("--");
+    $("#RecentFormCount").text("--");
+    $.ajax({
+        url: $("#hfdUrlPath").val() + '/Document/GetDahboardtilescount',
+        data: { "startDate": startDate, "endDate": endDate },
+        type: 'GET',
+        crossDomain: true,
+        success: function (result) {
+            
+            // $("#TabRecentDoc").html(result);
+          //  $("#TabRecentDochiden").html(result);
+
+            $("#RecentDocCount").text(result[0]);
+            $("#RecentArtiCount").text(result[1]);
+            $("#RecentFormCount").text(result[2]);
+            
+
+        }
+    });
+}
+
+function GetDahboardFilestilescount(startDate, endDate) {
+
+
+   
+    $("#RecentFileCount").text("--");
+    $("#RecentFormCount").text("--");
+    $.ajax({
+        url: $("#hfdUrlPath").val() + '/Document/GetDahboardFilestilescount',
+        data: { "startDate": startDate, "endDate": endDate },
+        type: 'GET',
+        crossDomain: true,
+        success: function (result) {
+
+            // $("#TabRecentDoc").html(result);
+            //  $("#TabRecentDochiden").html(result);
+
+            $("#RecentFileCount").text(result[0]);
+           
+            $("#RecentFormCount").text(result[1]);
+
+
+        }
+    });
+}
+
+function GetDahboardAck_ToDotilescount() {
+    var _url = '/Document/GetDahboardAckTo_Dotilescount';
+    if ($('#hdnFileAcknowledgment').val() === "True")
+        _url = '/File/GetDahboardFileAckTo_Dotilescount';
+    $("#AckToDoCount").text("--");
+    $.ajax({
+        url: $("#hfdUrlPath").val() + _url,
+       // data: { "startDate": startDate, "endDate": endDate },
+        type: 'GET',
+        crossDomain: true,
+        success: function (result) {
+            
+            
+            $("#AckToDoCount").text(result);
+
+        }
+    });
+}
+
+
+
+//Recent Article
+
+
+function _LoadArticleItems(startDate, endDate) {
+    
+    if (ArticleRefresh == true) {
+
+        $("#documentsearchArticletile").val('');
+        $("#RecentArtiCount").text("--");
+        $("#TabRecentArticle").html(DashLoderHtmlTiny);
+        $.ajax({
+            url: $("#hfdUrlPath").val() + '/Article/GetVesselMenuArticleInfo',
+            data: { "startDate": startDate, "endDate": endDate },
+            type: 'GET',
+            crossDomain: true,
+            success: function (result) {
+                $("#TabRecentArticle").html(result);
+                ConvertUTCDateToLocalDate("spnDashBrdArtUTCDate");
+                $("#RecentArtiCount").text($("#hdnRec_ArtiCount_Dash").val());
+            }
+        });
+        ArticleRefresh = false;
+    }
+}
+
+//Recent Forms/files
+function _LoadFormstems(startDate, endDate) {
+    
+    if (FilesRefresh == true) {
+
+
+        $("#documentsearchFilestile").val('');
+        $("#RecentFormCount").text("--");
+        $("#TabRecentForm").html(DashLoderHtmlTiny);
+        $.ajax({
+            url: $("#hfdUrlPath").val() + '/File/GetVesselMenuFormsInfo',
+            data: { "startDate": startDate, "endDate": endDate },
+            type: 'GET',
+            crossDomain: true,
+            success: function (result) {
+                $("#TabRecentForm").html(result);
+                ConvertUTCDateToLocalDate("divModifiedDate");
+                $("#RecentFormCount").text($("#hdnRec_FileCount_Dash").val());
+            }
+        });
+        FilesRefresh = false;
+    }
+}
+
+
+function _LoadFilesitems(startDate, endDate) {
+   
+    if (FilesNewRefresh == true) {
+
+
+        $("#documentsearchFile1").val('');
+        $("#RecentFileCount").text("--");
+        $("#TabRecentFile").html(DashLoderHtmlTiny);
+        $.ajax({
+            url: $("#hfdUrlPath").val() + '/File/GetFilesDashboardInfo',
+            data: { "startDate": startDate, "endDate": endDate },
+            type: 'GET',
+            crossDomain: true,
+            success: function (result) {
+                $("#TabRecentFile").html(result);
+                $("#RecentFileCount").text($("#hdnRec_FileNewCount_Dash").val());
+            }
+        });
+        FilesNewRefresh = false;
+    }
+}
+//--------------------------------------------Dashboard Manage items tile load -----------
+
+//Manage Articles
+function _LoadManageArticleItems() {
+   
+        $("#ManageDashArtiCount").text("--");
+        $("#ManagevslmArticleItsm").html(DashLoderHtmlTiny);
+        $.ajax({
+            type: 'GET',
+            url: $("#hfdUrlPath").val() + '/Article/GetManageArticlesInfo',
+
+            crossDomain: true,
+            success: function (result) {
+                $('#ManagevslmArticleItsm').html(result);
+                ConvertUTCDateToLocalDate("spnDashBrdMngArtUTCDate");
+                $("#ManageDashArtiCount").text($("#hdnArtiDocCount_Dash").val());
+            }
+        });
+    
+    
+}
+
+//Manage Documents
+function _LoadManageDocItems() {
+    $("#TilesManageDoc_dashboard").html(DashLoderHtmlTiny);
+    $("#ManageDashDocCount").text("--");
+
+    $.ajax({
+        url: $("#hfdUrlPath").val() + '/Document/Tiles_ManageDocument_dashboard',
+        data: {},
+        type: 'GET',
+        crossDomain: true,
+        success: function (result) {
+
+            $("#TilesManageDoc_dashboard").html(result);
+            ConvertUTCDateToLocalDate("spnDashBrdMngDocUTCDate");
+            $("#ManageDashDocCount").text($("#hdnManageDocCount_Dash").val());
+        }
+    });
+}
+
+//Manage Files
+function _LoadManageFileItems() {
+    $("#ManagevslmFileItsm").html(DashLoderHtmlTiny);
+    $("#ManageDashFileCount").text("--");
+
+    $.ajax({
+        url: $("#hfdUrlPath").val() + '/File/DashboardPendingFileList',
+        data: {},
+        type: 'GET',
+        crossDomain: true,
+        success: function (result) {
+            $("#ManagevslmFileItsm").html(result);
+            ConvertUTCDateToLocalDate("spnDashBrdMngFlsUTCDate");
+            $("#ManageDashFileCount").text($("#hdnFileDocCount_Dash").val());
+
+
+
+        }
+    });
+}
+
+//------------------------------------------BSM Circular ,LegacyDocList and Flag State Documents-------------
+
+//LegacyDocList
+//function _LoadLegacyDoclist(startDate, endDate) {
+
+//    $("#FlagFilesearchstile").val('');
+//    $("#LegacyDocList").text("--");
+//    $("#TilesLegacyDoclist_dashboard").html(DashLoderHtmlTiny);
+//    $.ajax({
+//        type: 'POST',
+//        url: $("#hfdUrlPath").val() + '/LegacyDocuments/GetVesselMenuFormsInfo',
+//        data: { "startDate": startDate, "endDate": endDate },
+//        crossDomain: true,
+//        success: function (result) {
+
+
+//            $('#TilesLegacyDoclist_dashboard').html(result);
+//            $("#LegacyDocList").text($("#hdn_legacyDocs_Count").val());
+
+//        }
+//    });
+//}
+
+//Flag State Documents
+function _LoadFlagFileslist(startDate, endDate, flag) {
+    
+        if (flag == 1) {
+            $("#FlagFilesearchstile").val('');
+            $("#Flag_Dashcount").text("--");
+            $("#TilesFlagfileslist_dashboard").html(DashLoderHtmlTiny);
+            $.ajax({
+                type: 'POST',
+                url: $("#hfdUrlPath").val() + '/FlagManagement/GetFlagLastDateRange',
+                data: { "startDate": startDate, "endDate": endDate },
+                processData: true,
+                success: function (result) {
+
+                    $('#TilesFlagfileslist_dashboard').html(result);
+                    ConvertUTCDateToLocalDate("spnDashBrdFlgUTCDate");
+
+                    $("#Flag_Dashcount").text($("#hdnFlag_Dash").val());
+                }
+            });
+
+        }
+        else {
+
+            $("#FlagFilesearchstile").val('');
+            $("#Flag_Dashcount").text("--");
+            $("#TilesFlagfileslist_dashboard").html(DashLoderHtmlTiny);
+            $.ajax({
+                type: 'POST',
+                url: $("#hfdUrlPath").val() + '/FlagManagement/GetDashboard_FlagFiles',
+                data: { "startDate": startDate, "endDate": endDate },
+                crossDomain: true,
+                success: function (result) {
+
+
+                    $('#TilesFlagfileslist_dashboard').html(result);
+                    ConvertUTCDateToLocalDate("spnDashBrdFlgUTCDate");
+                    $("#Flag_Dashcount").text($("#hdnFlag_Dash").val());
+
+                }
+            });
+       
+    }
+   
+    
+
+   
+}
+
+
+
+//BSM Circular
+
+function _LoadCircularslist(startDate, endDate) {
+    $("#CategoryFilesearchstile").val('');
+    $("#Flag_Dashcount").text("--");
+        $("#TilesCategorylist_dashboard").html(DashLoderHtmlTiny);
+        $.ajax({
+            type: 'GET',
+            url: $("#hfdUrlPath").val() + '/Categories/GetDashBoard_Categorylist',
+            data: { "startDate": startDate, "endDate": endDate },
+            crossDomain: true,
+            success: function (result) {
+
+                $('#TilesCategorylist_dashboard').html(result);
+              //  $("#CatgdashCount").text($("#hdnCatg_Dash").val());
+                //  _bindCircularSerach();
+
+            }
+        });
+    
+}
+
+//BSM Circular count
+
+function _LoadCircularslist_Count(startDate, endDate) {
+
+$("#TilesCategorylist_dashboard").html(DashLoderHtmlTiny);
+    $.ajax({
+        type: 'GET',
+        url: $("#hfdUrlPath").val() + '/Categories/GetDashBoard_CategorylistCountAsync',
+        data: { "startDate": startDate, "endDate": endDate },
+        crossDomain: true,
+        success: function (result) {
+
+         //   $('#TilesCategorylist_dashboard').html(result);
+            $("#CatgdashCount").text(result);
+            //  _bindCircularSerach();
+
+        }
+    });
+}
+
+//BSM Circular ondemand
+
+function _BSMCircularOnDemad() {
+    $("#BsmScrollLoader").show();
+
+    var url = $("#hfdUrlPath").val() + '/Categories/GetDashBoard_CategorylistOndemand';
+    $.ajax({
+        url: url,
+        type: 'GET',
+        data: { 'skip': $('#hdnCatg_Dash').val() },
+        crossDomain: true,
+        success: function (result) {
+            $("#BsmScrollLoader").hide();
+            $("#ulbsmcircular").append(result);
+            var onlist = parseInt($('#hdnCatg_Dash').val());
+            var ondemand = parseInt($('#hdnCatg_DashOndemand').val());
+            if (ondemand == 0) {
+                $('#Iscompleted').val("True");
+                return false;
+            }
+            else {
+                var totalcount = onlist + ondemand;
+                $('#hdnCatg_Dash').val(totalcount);
+                $('#hdnCatg_DashOndemand').hide();
+            }
+
+        }
+    });
+
+
+
+}
+
+//Flag files on load 
+
+function _LoadFlagLastDateRange(startDate, endDate) {
+
+    $("#FlagFilesearchstile").val('');
+    $("#Flag_Dashcount").text("--");
+    $("#TilesFlagfileslist_dashboard").html(DashLoderHtmlTiny);
+    $.ajax({
+        type: 'GET',
+        url: $("#hfdUrlPath").val() + '/FlagManagement/GetFlagLastDateRange',
+        data: { "startDate": startDate, "endDate": endDate },
+        processData: true,
+        success: function (result) {
+
+            $('#TilesFlagfileslist_dashboard').html(result);
+            ConvertUTCDateToLocalDate("spnDashBrdFlgUTCDate");
+
+            $("#Flag_Dashcount").text($("#hdnFlag_Dash").val());
+        }
+    });
+
+}
+
+//Flag files on load count
+
+function _LoadFlagLastDateRangeCount(startDate, endDate) {
+
+
+    $("#Flag_Dashcount").text("--");
+    $("#TilesFlagfileslist_dashboard").html(DashLoderHtmlTiny);
+    $.ajax({
+        type: 'POST',
+        url: $("#hfdUrlPath").val() + '/FlagManagement/GetFlagLastDateRangeCount',
+        data: { "startDate": startDate, "endDate": endDate },
+        processData: true,
+        success: function (result) {
+
+            //  $('#TilesFlagfileslist_dashboard').html(result);
+
+
+            $("#Flag_Dashcount").text(result);
+        }
+    });
+
+
+
+
+}
+
+//Flag files count while datepicker filter
+
+function _LoadFlagFileslistCount(startDate, endDate, flag) {
+
+
+    // $("#FlagFilesearchstile").val('');
+    if (flag == 1) {
+        $("#Flag_Dashcount").text("--");
+        $("#TilesFlagfileslist_dashboard").html(DashLoderHtmlTiny);
+        $.ajax({
+            type: 'POST',
+            url: $("#hfdUrlPath").val() + '/FlagManagement/GetFlagLastDateRangeCount',
+            data: { "startDate": startDate, "endDate": endDate },
+            processData: true,
+            success: function (result) {
+
+                //  $('#TilesFlagfileslist_dashboard').html(result);
+
+
+                $("#Flag_Dashcount").text(result);
+            }
+        });
+
+    }
+    else {
+        $("#Flag_Dashcount").text("--");
+        $("#TilesFlagfileslist_dashboard").html(DashLoderHtmlTiny);
+        $.ajax({
+            type: 'POST',
+            url: $("#hfdUrlPath").val() + '/FlagManagement/GetDashboard_FlagFilescount',
+            data: { "startDate": startDate, "endDate": endDate },
+            processData: true,
+            success: function (result) {
+
+                //  $('#TilesFlagfileslist_dashboard').html(result);
+
+
+                $("#Flag_Dashcount").text(result);
+            }
+        });
+
+    }
+
+
+
+
+
+}
+
+
+function LegacyDocs_clk() {
+    $('#bsmcicular_date_range_dash').hide();
+    $('#flg_date_range_dash').hide();
+    $('#legacydocs_date_range_dash').show();
+
+}
+
+
+
+//---------------------------------------- Acknowledgment common functions-------------------
+
+function ChooseAckUser() {
+
+    var LoderHtmlTiny = "<div class=\"tiny-loader\"><div class=\"loadernew loader--style3\" title=\"Loading\"><svg version=\"1.1\" id=\"loader-1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" width=\"30px\" height=\"30px\" viewBox=\"0 0 50 50\" style=\"enable-background:new 0 0 50 50;\" xml:space=\"preserve\"><path fill=\"#000\" d=\"M43.935,25.145c0-10.318-8.364-18.683-18.683-18.683c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615c8.072,0,14.615,6.543,14.615,14.615H43.935z\" transform=\"rotate(300 25 25)\">";
+    LoderHtmlTiny = LoderHtmlTiny + "<animateTransform attributeType=\"xml\" attributeName=\"transform\" type=\"rotate\" from=\"0 25 25\" to=\"360 25 25\" dur=\"0.6s\" repeatCount=\"indefinite\"></animateTransform></path></svg></div></div>";
+    $("#UserDtlsItemsList").html(LoderHtmlTiny);
+
+    $.ajax({
+        type: 'GET',
+        url: $("#hfdUrlPath").val() + '/Vessel/GetEmployeeBasedonRank',
+        processData: true,
+        success: function (result) {
+            var _FinalHtmlResult = "";
+            if (result != null && result.length > 0) {
+
+                $("#VslAcknowledgementPopup").removeClass("hidden");
+                $('#VslAcknowledgementPopup .pop-overlay').css('display', 'block');
+                _FinalHtmlResult = "<span><h5> Acknowledgment will be submit from : </h5></span></br><ul style=\"padding:13px\">";
+                for (var i = 0; i < result.length; i++) {
+                    _FinalHtmlResult = _FinalHtmlResult + "<li class=\"acknamelist\"><span>" + result[i].firstName + " " + result[i].lastName + "</span>"
+                    _FinalHtmlResult = _FinalHtmlResult + "<button class=\"btn btn-default default-buttons btn-sm pull-right\" onclick=\"OnClickAckDocPopup('" + result[i].Per_ID + "')\">Submit</button></li>"
+                }
+                _FinalHtmlResult = _FinalHtmlResult + "</ul>";
+                $("#UserDtlsItemsList").html(_FinalHtmlResult);
+
+
+            }
+            else {
+                $("#VslAcknowledgementPopup").removeClass("hidden");
+                $('#VslAcknowledgementPopup .pop-overlay').css('display', 'block');
+                $("#UserDtlsItemsList").html("<span>No users found !!!</span>");
+            }
+        }
+
+    });
+}
+
+function GetAckToDoVessel(IDval) {
+    
+    var LoderHtmlTiny = "<div class=\"tiny-loader\"><div class=\"loadernew loader--style3\" title=\"Loading\"><svg version=\"1.1\" id=\"loader-1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" width=\"30px\" height=\"30px\" viewBox=\"0 0 50 50\" style=\"enable-background:new 0 0 50 50;\" xml:space=\"preserve\"><path fill=\"#000\" d=\"M43.935,25.145c0-10.318-8.364-18.683-18.683-18.683c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615c8.072,0,14.615,6.543,14.615,14.615H43.935z\" transform=\"rotate(300 25 25)\">";
+    LoderHtmlTiny = LoderHtmlTiny + "<animateTransform attributeType=\"xml\" attributeName=\"transform\" type=\"rotate\" from=\"0 25 25\" to=\"360 25 25\" dur=\"0.6s\" repeatCount=\"indefinite\"></animateTransform></path></svg></div></div>";
+    $("#AckToDoCount").text("--");
+
+    $("#DocItemspopup").html(LoderHtmlTiny);
+    
+    var _url = $("#hdnFileAcknowledgment").val() === "True" || clientName === 'BP' ? '/File/GetFileAcknowledgementTodo' : '/Document/GetAcknowledgementTodo';
+    $.ajax({
+        url: $("#hfdUrlPath").val() + _url,
+        data: { "UsrID": IDval },
+        type: 'GET',
+        crossDomain: true,
+        success: function (result) {
+            $("#DocItemspopup").html(result);
+
+            $("#AckToDoCount").text($("#hdnAckDoToVesl_count").val());
+            $("#sltUsrBtn").hide();
+
+            $("#datefilterAckToDo6").show();
+
+            $("#VslAcknowledgementPopup").addClass("hidden");
+            $('#VslAcknowledgementPopup .pop-overlay').css('display', 'none');
+        }
+    });
+}
+
+function OnClickAckDocPopup(ID) {
+    $("#hdnAckUserselect").val("Y");
+
+    GetAckToDoVessel(ID);
+}
+function RefreshAckToDo() {
+    if ($("#hdnAppEnv").val() == 'V') {
+        _LoadAckDocListVessel();
+    }
+    else {
+        if ($(".acknowdoto").hasClass("active")) {
+
+            _LoadAcknwToDolist();
+        } else {
+            GetDahboardAck_ToDotilescount();
+        }
+    }
+}
+
+

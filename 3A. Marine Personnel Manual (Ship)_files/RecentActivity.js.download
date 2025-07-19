@@ -1,0 +1,153 @@
+﻿var lastDate = '';
+function RenderRecentActivity() {
+    $(".not-recent-tab>li").removeClass("active");
+    $(".not-recent-tab li.recent-tab").addClass("active");
+    $("#control-sidebar-home-tab").addClass("active");
+    $("#control-sidebar-notification-tab").removeClass("active");
+    var url = $("#hfdUrlPath").val() + '/RecentActivity/GetRecentActivity';
+    $.ajax({
+        url: url,
+        type: 'GET',
+        crossDomain: true,
+        success: function (result) {
+            lastDate = result.LastDate;
+            $(".recentActivity").html('');
+            if (result.RecentActivities != null && result.RecentActivities.length > 0) {
+                $.each(result.RecentActivities, function (i, n) {
+                    var item = "<li><a href=\"javascript:void(0)\" title=\'" + n.Activity + "\'>";
+                    item += "<i class=\"menu-icon fa fa-clock-o\"><\/i>";
+                    item += "<div class=\"menu-info\">";
+                    item += "<h6 class=\"control-sidebar-subheading\">" + n.Activity + "<\/h6>";
+                    item += "<p>Date : " + n.Date + "<\/p>";
+                    item += "<\/div>";
+                    item += "<\/a></li>";
+                    $(".recentActivity").append(item);
+                });
+            }
+           
+        }
+    });
+
+}
+function RenderRecentActivityOnDemand() {
+    $.ajax({
+        url: $("#hfdUrlPath").val() + "/RecentActivity/GetRecentActivityOnDemand",
+        type: 'GET',
+        crossDomain: true,
+        data: { 'date': lastDate },
+        success: function (result) {
+
+            lastDate = result.LastDate;
+            var strVar = "";
+            if (result.RecentActivities != null && result.RecentActivities.length > 0) {
+                $.each(result.RecentActivities, function (i, n) {
+                    var item = "<a href=\"javascript:void(0)\" title=\'" + n.Activity + "\'>";
+                    item += "<i class=\"menu-icon fa fa-clock-o\"><\/i>";
+                    item += "<div class=\"menu-info\">";
+                    item += "<h6 class=\"control-sidebar-subheading\">" + n.Activity + "<\/h6>";
+                    item += "<p>Date : " + n.Date + "<\/p>";
+                    item += "<\/div>";
+                    item += "<\/a>";
+                    strVar = strVar + item;
+                });
+            }
+            $("#recentActivity").append(strVar);
+        }
+    });
+}
+function RedirectLink(type)
+{
+    var event = '';
+    if (type == "Category")
+        event = "QDMS.Menu.CategoryManagement";
+    if (type == "Group")
+        event = "";
+    if (type == "ArticleDraft")
+        event = "RenderDraftArticleView";
+    if (type == "ArticleReviewsubmit")
+        event = "RenderArticleReviewView";
+    if (type == "ArticleEditordraft")
+        event = "RenderArticleReviewView";
+    if (type == "ArticleApprovesubmit")
+        event = "RenderArticleReviewView";
+    if (type == "ArticleReviewerdraft")
+        event = "RenderArticleReviewView";
+    if (type == "ArticleApproved")
+        event = "RenderArticleView";
+    if (type == "DocumentReviewsubmit" || type == "DocumentEditordraft" || type == "DocumentApprovesubmit" || type == "DocumentReviewerdraft" || type == "DocumentApproved")
+        event = "RenderDocView";
+    if (type == "DocumentDraft")
+        event = "RenderDraftView";
+    if (type == "Search")
+        event = "Search";
+    if (type == "File")
+        event = "RenderFilePage";
+    if (type == "Image")
+        event = "RenderImagePage";
+    if (type == "Email")
+        event = "";
+    if (type == "DocumentView")
+        event = "RenderDocView";
+    if (type == "ArticleView")
+        event = "RenderArticleView";
+    return event;
+}
+function Search(searchKey) {
+    if (searchKey != "" && searchKey.length >= 4) {
+
+        $("#breadcrum").text(">> Search");
+        var url = $("#hfdUrlPath").val() + '/document/searchDoc?searchString=' + searchKey;
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            crossDomain: true,
+            success: function (result) {
+                $('.commonsearch .searchloader').hide();
+                $("#contentWindow").html(result);
+                $("#header_search_field").val(searchKey);
+            }
+        });
+    }
+}
+
+function RenderFilePage(Id) {
+    $(".loader10").show();
+    var url = $("#hfdUrlPath").val() + '/File/GetAllFilesList';
+    $.ajax({
+        url: url,
+        data: { Keyword: "", CategoryID: "" },
+        type: 'POST',
+        crossDomain: true,
+        success: function (result) {
+            $(".loader10").hide();
+            $("#contentWindow").html(result);
+            $("#header_search_field").val("");
+        }
+    });
+}
+
+function RenderImagePage(Id) {
+    $(".categoryToolbarTitle").text('');
+    $('.categoryToolbarTitle').attr('title', '');
+    $(".categoryToolbarTitle").attr('id', '');
+    $(".loader10").show();
+    $(".loader10").css('z-index', '999');
+    var url = $("#hfdUrlPath").val() + '/ImageManagement/CommonImageView';
+    $.ajax({
+        url: url,
+        type: 'POST',
+        crossDomain: true,
+        success: function (result) {
+            $(".loader10").hide();
+            $(".loader10").css('z-index', '');
+            $("#container_link").hide();
+  $('#Acknlwdge').fadeOut();
+            $("#containerbookmark_link").hide();
+            $("#categoryMenu").show();
+            $("#containerDcrl_link").hide();
+            $("#contentWindow").html(result);
+
+        }
+    });
+}
