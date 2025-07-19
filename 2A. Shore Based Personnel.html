@@ -114,6 +114,15 @@
                         
                         <img src="./2A. Shore Based Personnel_files/menu-icon.png" title="Document Menu">
                     </a>
+                    <a class="logo" href="javascript:void(0)" id="LogoImg">
+                        <img src="./2A. Shore Based Personnel_files/qdmspal.png">
+                            </a><a href="http://ent-dbserver-fm:8080/Home/Landing/Index"><img src="./2A. Shore Based Personnel_files/PAL-4-QDMS-02.png"></a>
+                            <span>Flex Enterprise</span>
+
+                        <span class="logo-mini">
+
+                        </span>
+
                         <input type="hidden" id="hfdUrlPath" value="/WikiPALApp">
                         <!-- logo for regular state and mobile devices -->
                         
@@ -195,9 +204,48 @@
                         <li class="dropdown notifications-menu createdoc" id="MenuItems">
                             <a href="http://ent-dbserver-fm:8080/WikiPALApp/document/index#" class="dropdown-toggle" data-toggle="dropdown">  <img src="./2A. Shore Based Personnel_files/settings-menu.png" title="Activity Menu"> <span class="label label-info" id="UnreadMsgs"></span></a>
                             <ul class="dropdown-menu documentActions main-menu" id="yn-notification">
+<li>
+    <a onclick="QDMS.VesselMenu.GetRequestChangeDocList();SetTabTitle(&#39;DCR List | QDMS | PAL&#39;);" href="javascript:void(0)">
+        <i class="fa fa-commenting" aria-hidden="true"></i> DCR List
+    </a>
+</li>
+<li>
+    <a onclick="QDMS.VesselMenu.GetUserRequestChangeFormList();SetTabTitle(&quot;FCR List | QDMS | PAL&quot;);" href="javascript:void(0)">
+        <i class="fa fa-file-text" aria-hidden="true"></i> FCR List
+    </a>
+</li>
 
+<li>
+    <a onclick="QDMS.Menu.FileManagement();SetTabTitle(&#39;File Management | QDMS | PAL&#39;);" href="javascript:void(0)">
+        <i class="fa fa-list" aria-hidden="true"></i> File Management
+    </a>
+</li>
+<li>
+    <a onclick="QDMS.Menu.FlagManagement();SetTabTitle(&#39;Flag Management | QDMS | PAL&#39;);" href="javascript:void(0)">
+        <i class="fa fa-flag" aria-hidden="true"></i> Flag Management
+    </a>
+</li>
+<li>
+    <a href="javascript:void(0)" onclick="QDMS.VesselMenu.GetAcknowledgeList();SetTabTitle(&#39;Acknowledgement Report | QDMS | PAL&#39;);">
+        <i class="fa fa-handshake-o" aria-hidden="true"></i> Acknowledgement Report
+    </a>
+</li>
+<li>
+    <a href="javascript:void(0)" onclick="ReplicationVesselPacketLog();SetTabTitle(&#39;Packet Log | QDMS | PAL&#39;);">
+        <i class="fa fa-list-alt" aria-hidden="true"></i> Packet Log
+    </a>
+</li>
+<li style="display:none;">
+    <a href="javascript:void(0)" onclick="QDMS.Menu.PDFSettings();SetTabTitle(&#39;PDF Settings | QDMS | PAL&#39;);">
+        <i class="fa fa-cogs" aria-hidden="true"></i> PDF Settings
+    </a>
+</li>
+<li><a onclick="QDMS.Menu.GetDocumentMasterList();SetTabTitle(&#39;Forms Master List | QDMS | PAL&#39;);" href="javascript:void(0)"><i class="fa fa-file" aria-hidden="true"></i> Forms Master List</a></li>
+<li><a onclick="QDMS.Menu.GetDocumentChangeSummary();SetTabTitle(&#39;Document Change Summary | QDMS | PAL&#39;);" href="javascript:void(0)"><i class="fa fa-file-o" aria-hidden="true"></i> Document Change Summary</a></li>
 
+    <li style="display:none;"><a onclick="QDMS.Menu.GetArticleChangeSummary();SetTabTitle(&#39;Article Change Summary | QDMS | PAL&#39;);" href="javascript:void(0)"><i class="fa fa-file-o" aria-hidden="true"></i>  Article Change Summary</a></li>
 
+</ul>
                         </li>
 
                         <li class="dropdown notifications-menu">
@@ -211,7 +259,52 @@
                                         <input type="hidden" id="hdfUserName" value="Master">
 
 
-                          
+                            <ul class="dropdown-menu documentActions" id="yn-notification">
+
+                                <li><a href="javascript:void(0)" onclick="UserProfileView();SetTabTitle(&#39;Profile | QDMS | PAL&#39;);"><i class="fa fa-user" aria-hidden="true"></i> Profile</a></li>
+
+
+
+                                <li style="display:none"><a href="javascript:void(0)" onclick="IntegratorLog(); SetTabTitle(&#39;Error Log | QDMS | PAL&#39;);">Error Log</a></li>
+
+
+                                
+
+                                <li><a href="javascript:void(0)" onclick="onLogOut()"><i class="fa fa-sign-out" aria-hidden="true"></i> Logout</a></li>
+
+                            </ul>
+                        </li>
+                        <!-- Tasks: style can be found in dropdown.less -->
+                        <li>
+                            <a title="Help" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-question" aria-hidden="true"></i></a>
+                            <ul class="dropdown-menu documentActions" id="yn-notification">
+
+
+                                    <li>
+                                        <span>
+                                            <a href="javascript:void(0)" onclick="DownloadUserManual()">User Manual <i class="fa fa-download" aria-hidden="true" style="color: #c64255; margin-left:9px"></i></a>
+
+                                        </span>
+
+                                    </li>
+                                <li style="margin-top:7px">
+                                    <span>
+                                        <a href="javascript:void(0)" onclick="ApplicationInfo();SetTabTitle(&#39;App Info | QDMS | PAL&#39;);">App Info <i class="fa fa-info-circle" style="color: #c64255; margin-left:36px" aria-hidden="true"></i></a>
+
+                                    </span>
+
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="notifications">
+                            <a href="http://ent-dbserver-fm:8080/WikiPALApp/document/index#" data-toggle="control-sidebar" class="" title="Notifications"><i class="fa fa-bell-o" aria-hidden="true"></i></a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <nav id="pageTab-container"></nav>
+        </header>
         <!-- Left side column. contains the logo and sidebar -->
         <aside class="main-sidebar">
             <!-- sidebar: style can be found in sidebar.less -->
@@ -758,6 +851,9 @@
                 <input type="hidden" id="HdnModeDirct" value="0">
                 <div class="pull-right" style="margin-top:4px;">
                     <input type="text" style="width:150px;border: solid 1px #ccc;height:100%" name="q" id="View_search_field" placeholder="find text...">
+                    <a href="javascript:void(0)" onclick="FindPrevHighlightText()" class="findnext"><i class="fa fa-chevron-up" aria-hidden="true" data-count="0" id="FindNxt" title="Previous"></i></a>
+                    <a href="javascript:void(0)" onclick="FindNextHighlightText()" class="findprevious"><i class="fa fa-chevron-down" aria-hidden="true" data-count="0" id="FindPrev" title="Next"></i></a>
+
                 </div>
                 <div class="pull-right edithtmldiv-loader" id="editloader" style="display:none">
                 </div>
@@ -774,6 +870,10 @@
                                         <i class="fa fa-caret-down" aria-hidden="true"></i>
                                     </button>
                                     <div class="dropdown-menu" style="min-width:190px" aria-labelledby="dcrklCommentTemplate">
+                                        <ul>
+                                            <li title="Comment"><a href="javascript:void(0)" class="dropdown-item dcrl-items" onclick="DocumentCommentOffice.Func.SaveDraftPostComments()" title="Save Change Request as draft"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Save Change Request</a></li>
+                                            <li title="Comment"><a href="javascript:void(0)" class="dropdown-item dcrl-items" onclick="DocumentCommentOffice.Func.PostComments()" title="Submit Change Request"><i class="fa fa-check-circle-o" aria-hidden="true"></i> Submit Change Request</a></li>
+                                        </ul>
                                     </div>
                                 </div>
                             </li>
@@ -2879,6 +2979,9 @@
     <span class="d-flex fileattachbtnsec">
         <input type="file" id="fileAttachment" onchange="NewMethod(this)" style="display:none">
         <label class="displayName" title="">No file chosen</label>
+        <a href="javascript:void(0)" class="fileattachbtn" title="Upload File">
+            <label for="fileAttachment" class="forUpload" title="Upload File"><i class="fa fa-paperclip fa-2x" aria-hidden="true" title="Upload File"></i></label>
+        </a>
         <button class="pull-right btn red-buttons" id="DeclDoneComment" onclick="RealCheckAcknowledgementStatus()">Send Acknowledgement</button>
         <button class="pull-right btn btn-default default-buttons" style="margin-left:3px" id="CloseButtonAttach" onclick="ClosePopZ()">Cancel</button>
     </span>
@@ -2890,6 +2993,9 @@
         <span class="d-flex fileattachbtnsec">
             <input type="file" id="fileAttachment" onchange="NewMethod(this)" style="display:none">
             <label class="displayName" title="">No file chosen</label>
+            <a href="javascript:void(0)" class="fileattachbtn">
+                <label for="fileAttachment" class="forUpload"><i class="fa fa-paperclip fa-2x" aria-hidden="true"></i></label>
+            </a>
             <button class="pull-right btn red-buttons" id="DeclDoneComment" onclick="DCRLComment.Func.AddDCRLCommentArray()">Save Change Request</button>
         </span>
 
@@ -2903,6 +3009,9 @@
         <span class="d-flex fileattachbtncntrl">
             <input type="file" id="fileAtt" onchange="ControlMethod(this)" style="display:none">
             <label class="displayNameCntrl" title="">No file chosen</label>
+            <a href="javascript:void(0)" class="fileattachbtnz">
+                <label for="fileAtt" class="forUploadCntrl"><i class="fa fa-paperclip fa-2x" aria-hidden="true"></i></label>
+            </a>
             <button class="pull-right btn red-buttons" id="Dcrl_control_DoneComment" onclick="DCRLComment.Func.Add_Control_DCRLCommentArray()">Save Change Request</button>
         </span>
 
